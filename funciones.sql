@@ -106,3 +106,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- TRIGGER PARA INSERT EN DETALLE_ORDEN_PEDIDO
+
+CREATE TRIGGER trigger_actualizar_datos_pedido
+BEFORE INSERT ON detalle_orden_pedido
+FOR EACH ROW
+EXECUTE FUNCTION actualizar_datos_pedido()
