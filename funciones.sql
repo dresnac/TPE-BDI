@@ -67,3 +67,42 @@ DELIMITER ',' CSV HEADER;
 COPY detalle_orden_pedido(id_pedido, nro_item, id_producto, cantidad)
 FROM 'data/detalle_orden_pedido.csv'
 DELIMITER ',' CSV HEADER;
+
+-- FUNCIÓN PARA COMPLETAR DETALLE Y ACTUALIZAR ORDEN Y STOCK
+
+CREATE OR REPLACE FUNCTION actualizar_datos_pedido()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_precio_producto NUMERIC(10,2);
+BEGIN
+    -- Obtener precio del producto
+    SELECT precio INTO v_precio_producto
+    FROM producto
+    WHERE id = NEW.id_producto;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Producto con id % no encontrado.', NEW.id_producto;
+    END IF;
+
+    -- Calcular precio y monto en el detalle
+    NEW.precio := v_precio_producto;
+    NEW.monto := NEW.cantidad * v_precio_producto;
+
+    -- Actualizar stock del producto (sumar cantidad)
+    UPDATE producto
+    SET stock = stock + NEW.cantidad
+    WHERE id = NEW.id_producto;
+
+    -- Recalcular monto total de la orden
+    UPDATE orden_pedido
+    SET monto = (
+        SELECT COALESCE(SUM(monto), 0)
+        FROM detalle_orden_pedido
+        WHERE id_pedido = NEW.id_pedido
+    )
+    WHERE id = NEW.id_pedido;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
