@@ -211,3 +211,63 @@ CREATE TRIGGER trigger_insertar_en_orden_mes_categoria
 INSTEAD OF INSERT ON orden_mes_categoria
 FOR EACH ROW
 EXECUTE FUNCTION insertar_en_orden_mes_categoria();
+
+-- FUNCIÓN PARA BORRAR DESDE LA VISTA ORDEN_MES_CATEGORIA
+
+CREATE OR REPLACE FUNCTION borrar_en_orden_mes_categoria()
+RETURNS TRIGGER AS $$
+DECLARE
+    anio_base INT;
+    anio_delete INT := CAST(LEFT(OLD.mes, 4) AS INT);
+    fecha_base DATE := TO_DATE(OLD.mes || '-01', 'YYYY-MM-DD');
+    producto_id INT;
+    cantidad_total INT;
+BEGIN
+    -- Validar que sea el año más reciente
+    SELECT MAX(EXTRACT(YEAR FROM fecha)) INTO anio_base FROM orden_pedido;
+    IF anio_delete <> anio_base THEN
+        RAISE NOTICE 'No se puede borrar de años distintos al más reciente (%).', anio_base;
+        RETURN NULL;
+    END IF;
+
+    -- Obtener ID del producto por default
+    SELECT id INTO producto_id FROM producto
+    WHERE descripcion = 'No Asignado - ' || OLD.categoria;
+
+    IF NOT FOUND THEN
+        RAISE NOTICE 'No hay producto por default para categoría %. Nada que borrar.', OLD.categoria;
+        RETURN NULL;
+    END IF;
+
+    -- Calcular la cantidad total que se va a borrar (para actualizar el stock)
+    SELECT COALESCE(SUM(cantidad), 0)
+    INTO cantidad_total
+    FROM detalle_orden_pedido d
+    JOIN orden_pedido o ON d.id_pedido = o.id
+    WHERE d.id_producto = producto_id AND o.fecha = fecha_base AND o.id_proveedor = 90;
+
+    -- Borrar detalle y órdenes correspondientes
+    DELETE FROM detalle_orden_pedido
+    WHERE id_producto = producto_id AND id_pedido IN (
+        SELECT id FROM orden_pedido
+        WHERE fecha = fecha_base AND id_proveedor = 90
+    );
+
+    DELETE FROM orden_pedido
+    WHERE fecha = fecha_base AND id_proveedor = 90;
+
+    -- Actualizar stock
+    UPDATE producto
+    SET stock = stock - cantidad_total
+    WHERE id = producto_id;
+
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- TRIGGER INSTEAD OF DELETE EN VISTA ORDEN_MES_CATEGORIA
+
+CREATE TRIGGER trigger_borrar_en_orden_mes_categoria
+INSTEAD OF DELETE ON orden_mes_categoria
+FOR EACH ROW
+EXECUTE FUNCTION borrar_en_orden_mes_categoria();
