@@ -1,0 +1,90 @@
+id;CUIT;razon_social;tipo_sociedad;direccion;activo;habilitado
+1;30660608172;Arcos Plateados;SA;Pelliza 4234, Olivos, BA;0;0
+2;30660608173;Grupo Fernandez;SRL;San Martin 640 Piso 7, CABA;1;1
+3;30660608174;Innovation;SAS;Av del Libertador 32560, CABA;1;1
+4;30660608175;Alimentos Naturales;SA;Calle 13 452, La Plata, BA;0;0
+5;30660608176;Servicios Integrales;SA;Lavarden 43, CABA;1;1
+6;30660608177;Transporte Rapido;SA;;1;1
+7;30660608178;Productos de Limpieza;SA;Avda Cabildo 1043 Piso 12, CABA;1;1
+8;30660608179;Energia Renovable;SA;Direccion default;1;1
+9;30660608180;Estes;SA;Alvear 4234, Olivos, BA;1;1
+10;30660608181;Saunders;SA;Reconquista 640 Piso 7, CABA;1;1
+11;30660608182;Alvarado;SA;Av del Libertador 2560, CABA;1;0
+12;30660608183;Hubbard;SA;Calle 45 452, La Plata, BA;1;0
+13;30660608184;Knowles;SA;Iguazu 43, CABA;1;1
+14;30660608185;Servicios de Punta;SA;Avda Cabildo 2043 Piso 12, CABA;1;1
+15;30660608190;Consultoria Avanzada;SRL;Espania 4234, Olivos, BA;1;1
+16;30660608191;Tecnologia Moderna;SRL;Tucuman 640 Piso 7, CABA;1;1
+17;30660608192;Tecnologia Avanzada;SRL;Av del Libertador 12560, CABA;1;1
+18;30660608193;Servicios Generales;SRL;Calle 45 246, La Plata, BA;1;1
+19;30660608194;Boyle;SRL;Los Patos 3421, CABA;1;1
+20;30660608195;Dorsey;SRL;Avda Cabildo 1543 Piso 12, CABA;1;1
+21;30660608196;Summers;SRL;Madero 4234, Olivos, BA;1;1
+22;30660608197;Frye;SRL;Peron 640 Piso 7, CABA;1;0
+23;30660608198;Swanson;SRL;Av del Libertador 12563, CABA;1;1
+24;30660608199;Burgess;SRL;Calle 22 246, La Plata, BA;1;1
+25;30660608200;Merrill;SRL;Los Patos 342, CABA;1;1
+26;30660608201;Sweeney;SRL;Avda Cabildo 1543 Piso 2, CABA;1;1
+27;30660608202;Wong;SRL;Direccion default;1;0
+28;30660608203;Garrison;SRL;Espora 4234, Olivos, BA;1;1
+29;30660608204;Levine;SA;Florida 640 Piso 7, CABA;1;1
+30;30660608205;Noel;SRL;Av del Libertador 22563, CABA;1;1
+31;30660608206;Pescados La Sirena;SAS;Calle 2 246, La Plata, BA;1;1
+32;30660608207;Oneill;SA;Av Caseros 342, CABA;1;1
+33;30660608208;Parrish;SRL;Avda Cabildo 543 Piso 2, CABA;1;1
+34;30660608212;Miranda;SA;Madero 3234, Olivos, BA;1;1
+35;30660608213;Potts;SA;Peron 740 Piso 7, CABA;1;1
+36;30660608214;Roy;SA;Av del Libertador 22563, CABA;1;0
+37;30660608215;Gallagher;SA;Calle 22 y Calle 15, La Plata, BA;1;0
+38;30660608216;Tyson;SA;Av Caseros 3425, CABA;1;0
+39;30660608217;Copeland;SA;Avda Cabildo 743 Piso 2, CABA;1;1
+40;20243608218;Carlos Fernandez;;;1;1
+41;30660608219;Morton;Colectiva;Av. Rivadavia 4505, CABA;1;1
+42;20243608219;Victor Manuel;;;1;1
+43;20243608220;Angelica Salerno;;Palpa 2390 Piso 13 Oficina 43, CABA;1;1
+44;30660608222;Ramos;SAS;Madero 3234, Olivos, BA;1;1
+45;30660608223;Baker;SAS;Peron 740 Piso 7, CABA;1;1
+46;30660608224;Bernard;SAS;Av del Libertador 22563, CABA;1;1
+47;30660608225;Norton;SAS;Calle 22 y Calle 15, La Plata, BA;1;1
+48;30660608226;Casey;SAS;Av Caseros 3425, CABA;1;1
+49;20243608221;Pepe Morgan;;Avda Cabildo 743 Piso 2, CABA;1;1
+50;20243608222;Catalina Reinolds;;Madero 3234, Olivos, BA;1;1
+51;30660608229;Stokes;SA;Peron 740 Piso 7, CABA;1;1
+52;30660608230;Cooke;SA;Av del Libertador 22563, CABA;1;1
+53;30660608231;Herman;SA;Calle 22 y Calle 17, La Plata, BA;1;1
+54;30660608232;Reynolds;SA;Caseros 1425, CABA;1;1
+55;30660608237;Robbins;SA;Cabildo 843 Piso 2, CABA;1;1
+56;30660608238;Ray;SA;Urquiza 3234, Olivos, BA;1;0
+57;30660608239;Moreno;SA;Reconquista 740 Piso 11, CABA;1;0
+58;30660608240;Cole;SA;Av del Libertador 20563, CABA;1;1
+59;30660608241;Leblanc;SA;Calle 64 5, La Plata, BA;1;1
+60;30660608242;Boyer;SA;Av Caseros 3025, CABA;1;1
+61;30660608243;Clemons;SA;Avda Cabildo 711 Piso 2, CABA;1;1
+62;20243608223;Gonzalez Esteban;;;0;0
+63;30660608245;Moss;SRL;Madero 3234 Piso 12, Olivos, BA;1;1
+64;30660608246;Grimes;SRL;Peron 740, CABA;1;1
+65;30660608247;Francis;SRL;Av del Libertador 22333, CABA;0;0
+66;30660608248;Schroeder;SRL;Calle 50, La Plata, BA;0;0
+67;30660608249;Page;SRL;Av Caseros 3435, CABA;1;1
+68;30660608250;Harris;SRL;Avda Cabildo 1143 Piso 2, CABA;1;1
+69;30660608251;Rose;SRL;Madero 3230, Olivos, BA;0;0
+70;30660608252;Oconnor;SRL;Peron 750 Piso 7, CABA;0;0
+71;30660608253;Sutton;SRL;Av del Libertador 4563, CABA;1;1
+72;30660608254;Pugh;SRL;Calle 44, La Plata, BA;1;1
+73;30660608255;Savage;SRL;Av Caseros 245, CABA;0;0
+74;30660608256;Bond;SRL;Avda Cabildo 1743 Piso 2, CABA;0;0
+75;30660608257;Moreno;SRL;Direccion default;1;1
+76;30660608258;Henson;SRL;Direccion default;1;1
+77;30660608259;Barker;SRL;;0;0
+78;30660608260;Berger;SRL;Madero 3234, Olivos, BA;0;0
+79;30660608261;Holloway;SRL;Peron 740 Piso 7, CABA;1;1
+80;30660608262;Vance;SRL;Av del Libertador 13563, CABA;1;1
+81;30660608263;Clarke;SRL;Calle 15 34, La Plata, BA;0;0
+82;30660608264;Meyers;SRL;Av Caseros 1425, CABA;0;0
+83;30660608265;Randolph;SRL;Avda Cabildo 740 Piso 2, CABA;1;1
+84;30660608266;Bray;SRL;Madero 3230, Olivos, BA;1;1
+85;30660608267;Kline;Colectiva;Junin 740 Piso 7, CABA;0;0
+86;30660608268;Crane;Colectiva;Av del Libertador 2563, CABA;0;0
+87;30660608269;Franks;SA;Calle 22 544, La Plata, BA;1;1
+88;30660608270;Ryan;SRL;Av Caseros 2425, CABA;1;1
+89;30660608271;Haynes;SRL;Cabildo 643 Piso 2, CABA;0;0
