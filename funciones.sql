@@ -1,12 +1,10 @@
--- funciones.sql
-
--- DROP TABLES (para facilitar pruebas durante desarrollo)
 DROP TABLE IF EXISTS detalle_orden_pedido CASCADE;
 DROP TABLE IF EXISTS orden_pedido CASCADE;
 DROP TABLE IF EXISTS producto CASCADE;
 DROP TABLE IF EXISTS proveedor CASCADE;
 
--- Tabla PROVEEDOR
+SET datestyle = 'DMY';
+
 CREATE TABLE proveedor (
     id            INTEGER PRIMARY KEY,
     cuit          BIGINT NOT NULL UNIQUE,
@@ -17,17 +15,15 @@ CREATE TABLE proveedor (
     habilitado    BOOLEAN NOT NULL
 );
 
--- Tabla PRODUCTO
 CREATE TABLE producto (
     id          INTEGER PRIMARY KEY,
     descripcion TEXT NOT NULL,
     marca       TEXT,
-    categoria   TEXT NOT NULL,
+    categoria   TEXT,
     precio      NUMERIC(10, 2) NOT NULL,
     stock       INTEGER NOT NULL
 );
 
--- Tabla ORDEN_PEDIDO
 CREATE TABLE orden_pedido (
     id           INTEGER PRIMARY KEY,
     id_proveedor INTEGER NOT NULL REFERENCES proveedor(id),
@@ -35,7 +31,6 @@ CREATE TABLE orden_pedido (
     monto        NUMERIC(12, 2)
 );
 
--- Tabla DETALLE_ORDEN_PEDIDO
 CREATE TABLE detalle_orden_pedido (
     id_pedido   INTEGER REFERENCES orden_pedido(id),
     nro_item    INTEGER,
@@ -46,29 +41,7 @@ CREATE TABLE detalle_orden_pedido (
     PRIMARY KEY (id_pedido, nro_item)
 );
 
--- IMPORTACIÓN DE DATOS
-
--- IMPORTAR PROVEEDOR
-COPY proveedor(id, cuit, razon_social, tipo_sociedad, direccion, activo, habilitado)
-FROM 'data/proveedor.csv'
-DELIMITER ',' CSV HEADER;
-
--- IMPORTAR PRODUCTO
-COPY producto(id, descripcion, marca, categoria, precio, stock)
-FROM 'data/producto.csv'
-DELIMITER ',' CSV HEADER;
-
--- IMPORTAR ORDEN_PEDIDO (sin el campo monto)
-COPY orden_pedido(id, id_proveedor, fecha)
-FROM 'data/orden_pedido.csv'
-DELIMITER ',' CSV HEADER;
-
--- IMPORTAR DETALLE_ORDEN_PEDIDO (sin los campos precio y monto)
-COPY detalle_orden_pedido(id_pedido, nro_item, id_producto, cantidad)
-FROM 'data/detalle_orden_pedido.csv'
-DELIMITER ',' CSV HEADER;
-
--- FUNCIÓN PARA COMPLETAR DETALLE Y ACTUALIZAR ORDEN Y STOCK
+-- FUNCION PARA COMPLETAR DETALLE Y ACTUALIZAR ORDEN Y STOCK
 
 CREATE OR REPLACE FUNCTION actualizar_datos_pedido()
 RETURNS TRIGGER AS $$
@@ -111,9 +84,9 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trigger_actualizar_datos_pedido
 BEFORE INSERT ON detalle_orden_pedido
 FOR EACH ROW
-EXECUTE FUNCTION actualizar_datos_pedido()
+EXECUTE FUNCTION actualizar_datos_pedido();
 
--- VISTA ORDEN_MES_CATEGORIA (solo año más reciente)
+-- VISTA ORDEN_MES_CATEGORIA (solo ano mas reciente)
 
 CREATE OR REPLACE VIEW orden_mes_categoria AS
 SELECT 
@@ -130,7 +103,7 @@ WHERE EXTRACT(YEAR FROM op.fecha) = (
 )
 GROUP BY TO_CHAR(op.fecha, 'YYYY-MM'), p.categoria;
 
--- FUNCIÓN PARA INSERTAR EN ORDEN_MES_CATEGORIA
+-- FUNCION PARA INSERTAR EN ORDEN_MES_CATEGORIA
 
 CREATE OR REPLACE FUNCTION insertar_en_orden_mes_categoria()
 RETURNS TRIGGER AS $$
@@ -144,16 +117,16 @@ DECLARE
     precio_unitario NUMERIC;
     i INT;
 BEGIN
-    -- Validar que sea el año más reciente
+    -- Validar que sea el ano mas reciente
     SELECT MAX(EXTRACT(YEAR FROM fecha)) INTO anio_base FROM orden_pedido;
     IF anio_insert <> anio_base THEN
-        RAISE NOTICE 'No se puede insertar en años distintos al más reciente (%).', anio_base;
+        RAISE NOTICE 'No se puede insertar en anos distintos al mas reciente (%).', anio_base;
         RETURN NULL;
     END IF;
 
-    -- Validar divisibilidad de cantidad entre órdenes
+    -- Validar divisibilidad de cantidad entre ordenes
     IF MOD(NEW.total_cantidad, NEW."#_ordenes") <> 0 THEN
-        RAISE NOTICE 'Cantidad total no divisible entre la cantidad de órdenes.';
+        RAISE NOTICE 'Cantidad total no divisible entre la cantidad de ordenes.';
         RETURN NULL;
     END IF;
 
@@ -182,7 +155,7 @@ BEGIN
         VALUES (proveedor_id, 0, 'No Asignada', 'SA', '', false, false);
     END IF;
 
-    -- Insertar las órdenes y detalles
+    -- Insertar las ordenes y detalles
     FOR i IN 1..NEW."#_ordenes" LOOP
         INSERT INTO orden_pedido(id, id_proveedor, fecha, monto)
         VALUES (
@@ -212,7 +185,7 @@ INSTEAD OF INSERT ON orden_mes_categoria
 FOR EACH ROW
 EXECUTE FUNCTION insertar_en_orden_mes_categoria();
 
--- FUNCIÓN PARA BORRAR DESDE LA VISTA ORDEN_MES_CATEGORIA
+-- FUNCION PARA BORRAR DESDE LA VISTA ORDEN_MES_CATEGORIA
 
 CREATE OR REPLACE FUNCTION borrar_en_orden_mes_categoria()
 RETURNS TRIGGER AS $$
@@ -223,10 +196,10 @@ DECLARE
     producto_id INT;
     cantidad_total INT;
 BEGIN
-    -- Validar que sea el año más reciente
+    -- Validar que sea el ano mas reciente
     SELECT MAX(EXTRACT(YEAR FROM fecha)) INTO anio_base FROM orden_pedido;
     IF anio_delete <> anio_base THEN
-        RAISE NOTICE 'No se puede borrar de años distintos al más reciente (%).', anio_base;
+        RAISE NOTICE 'No se puede borrar de anos distintos al mas reciente (%).', anio_base;
         RETURN NULL;
     END IF;
 
@@ -235,7 +208,7 @@ BEGIN
     WHERE descripcion = 'No Asignado - ' || OLD.categoria;
 
     IF NOT FOUND THEN
-        RAISE NOTICE 'No hay producto por default para categoría %. Nada que borrar.', OLD.categoria;
+        RAISE NOTICE 'No hay producto por default para categoria %. Nada que borrar.', OLD.categoria;
         RETURN NULL;
     END IF;
 
@@ -246,7 +219,7 @@ BEGIN
     JOIN orden_pedido o ON d.id_pedido = o.id
     WHERE d.id_producto = producto_id AND o.fecha = fecha_base AND o.id_proveedor = 90;
 
-    -- Borrar detalle y órdenes correspondientes
+    -- Borrar detalle y ordenes correspondientes
     DELETE FROM detalle_orden_pedido
     WHERE id_producto = producto_id AND id_pedido IN (
         SELECT id FROM orden_pedido
