@@ -84,7 +84,7 @@ AFTER INSERT ON detalle_orden_pedido
 FOR EACH ROW
 EXECUTE FUNCTION actualizar_datos_pedido();
 
--- VISTA ORDEN_MES_CATEGORIA (solo ano mas reciente)
+-- VISTA ORDEN_MES_CATEGORIA (solo anio mas reciente)
 
 CREATE OR REPLACE VIEW orden_mes_categoria AS
 SELECT 
@@ -110,15 +110,16 @@ DECLARE
     anio_insert INT := CAST(LEFT(NEW.mes, 4) AS INT);
     mes_insert TEXT := RIGHT(NEW.mes, 2);
     fecha_base DATE := TO_DATE(NEW.mes || '-01', 'YYYY-MM-DD');
-    proveedor_id INT := 90;
+    proveedor_id INT;
     producto_id INT;
     precio_unitario NUMERIC;
     i INT;
 BEGIN
-    -- Validar que sea el ano mas reciente
+    SELECT MAX(id) INTO proveedor_id FROM producto;
+    -- Validar que sea el anio mas reciente
     SELECT MAX(EXTRACT(YEAR FROM fecha)) INTO anio_base FROM orden_pedido;
     IF anio_insert <> anio_base THEN
-        RAISE NOTICE 'No se puede insertar en anos distintos al mas reciente (%).', anio_base;
+        RAISE NOTICE 'No se puede insertar en anios distintos al mas reciente (%).', anio_base;
         RETURN NULL;
     END IF;
 
@@ -133,11 +134,11 @@ BEGIN
     WHERE descripcion = 'No Asignado - ' || NEW.categoria;
 
     IF NOT FOUND THEN
-        producto_id := (SELECT COALESCE(MAX(id), 89) + 1 FROM producto);
-        precio_unitario := NEW."$_promedio" / NEW.total_cantidad;
+        producto_id := (SELECT COALESCE(MAX(id), 0) + 1 FROM producto);
+        precio_unitario := (NEW."$_promedio" * NEW."#_ordenes") / NEW.total_cantidad;
 
         INSERT INTO producto(id, descripcion, marca, categoria, precio, stock)
-        VALUES (producto_id, 'No Asignado - ' || NEW.categoria, 'NA', NEW.categoria, precio_unitario, NEW.total_cantidad);
+        VALUES (producto_id, 'No Asignado - ' || NEW.categoria, 'NA', NEW.categoria, precio_unitario, 0);
     ELSE
         -- Si existe, actualizo el stock
         UPDATE producto
@@ -194,38 +195,43 @@ DECLARE
     producto_id INT;
     cantidad_total INT;
 BEGIN
-    -- Validar que sea el ano mas reciente
+    -- Validar que sea el anio mas reciente
     SELECT MAX(EXTRACT(YEAR FROM fecha)) INTO anio_base FROM orden_pedido;
     IF anio_delete <> anio_base THEN
-        RAISE NOTICE 'No se puede borrar de anos distintos al mas reciente (%).', anio_base;
+        RAISE NOTICE 'No se puede borrar de anios distintos al mas reciente (%).', anio_base;
         RETURN NULL;
     END IF;
 
-    -- Obtener ID del producto por default
-    SELECT id INTO producto_id FROM producto
-    WHERE descripcion = 'No Asignado - ' || OLD.categoria;
+    -- Obtener el ID del producto correspondiente al mes y categoria
+    SELECT DISTINCT p.id
+    INTO producto_id
+    FROM producto p
+    JOIN detalle_orden_pedido d ON d.id_producto = p.id
+    JOIN orden_pedido o ON o.id = d.id_pedido
+    WHERE TO_CHAR(o.fecha, 'YYYY-MM') = OLD.mes
+     AND p.categoria = OLD.categoria;
 
     IF NOT FOUND THEN
-        RAISE NOTICE 'No hay producto por default para categoria %. Nada que borrar.', OLD.categoria;
-        RETURN NULL;
+     RAISE NOTICE 'No se encontro ningun producto para mes % y categoria %.', OLD.mes, OLD.categoria;
+    RETURN NULL;
     END IF;
 
-    -- Calcular la cantidad total que se va a borrar (para actualizar el stock)
+    -- Calcular la cantidad total que se va a borrar
     SELECT COALESCE(SUM(cantidad), 0)
     INTO cantidad_total
     FROM detalle_orden_pedido d
     JOIN orden_pedido o ON d.id_pedido = o.id
-    WHERE d.id_producto = producto_id AND o.fecha = fecha_base AND o.id_proveedor = 90;
+    WHERE d.id_producto = producto_id AND o.fecha = fecha_base;
 
     -- Borrar detalle y ordenes correspondientes
     DELETE FROM detalle_orden_pedido
     WHERE id_producto = producto_id AND id_pedido IN (
         SELECT id FROM orden_pedido
-        WHERE fecha = fecha_base AND id_proveedor = 90
+        WHERE fecha = fecha_base
     );
 
     DELETE FROM orden_pedido
-    WHERE fecha = fecha_base AND id_proveedor = 90;
+    WHERE fecha = fecha_base;
 
     -- Actualizar stock
     UPDATE producto
@@ -235,8 +241,6 @@ BEGIN
     RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
-
--- TRIGGER INSTEAD OF DELETE EN VISTA ORDEN_MES_CATEGORIA
 
 CREATE TRIGGER trigger_borrar_en_orden_mes_categoria
 INSTEAD OF DELETE ON orden_mes_categoria
